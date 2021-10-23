@@ -30,8 +30,8 @@
         }
 
         public static function encrypt( string $pt, string $key = null, string $iv = null ) {
-            $key = ( empty( $key ) or 32 > strlen( $key )) ? cyphper::hex_gen( 32 ) : $key;
-            $iv = ( empty( $iv ) or 16 > strlen( $iv )) ? cyphper::hex_gen( 16 ) : $iv;
+            $key = ( empty( $key ) || 32 > strlen( $key )) ? cyphper::hex_gen( 32 ) : $key;
+            $iv = ( empty( $iv ) || 16 > strlen( $iv )) ? cyphper::hex_gen( 16 ) : $iv;
             $ct = openssl_encrypt( $pt, 'AES-256-CTR', $key, 0, $iv );
             $msg = cyphper::hmac_sign( $ct, $key );
             return array( 'message' => $msg, 'key' => $key, 'iv' => $iv );
