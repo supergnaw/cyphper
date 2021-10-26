@@ -2,7 +2,7 @@
     class cyphper {
 
         function __construct() {
-            // nothing to see here
+            // nothing to see here...yet
         }
 
         public static function bytes_gen( $length = 16, $strongEnforce = true ) {
