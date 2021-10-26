@@ -1,6 +1,8 @@
 # cyphper
 Simple PHP class to easily implement data encryption and decryption. This can be used as a base class to expand upon or simply just to use the static classes.
 
+***This by no means is meant to replace robust and significantly test libraries. This is a learning exercise in capabilities for the author.***
+
 ## Basic Usage
 
 Basic encryption and decryption is accomplished using `encrypt()` and `decrypt()`, as shown below:
