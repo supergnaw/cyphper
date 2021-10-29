@@ -1,11 +1,12 @@
 <?php
 	// setting example variables
-	$msg = "example.php";
+	$ptd = "example.php";
 	$pwd = "super secret password";
+	echo "Plaintext Data: {$ptd}";
 
 	// encrypt
-	$cyp = new cyphper( $msg, $pwd );
 	try {
+		$cyp = new cyphper( $ptd, $pwd );
 		$enc = $cyp->get_enc_msg();
 	} catch( Exception $e ) {
 		die( $e->getMessage());
