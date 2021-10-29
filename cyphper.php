@@ -1,32 +1,33 @@
 <?php
     class cyphper {
 
-        function __construct() {
-            // nothing to see here...yet
+        function __construct()
+        {
+            // nothing to see here
         }
 
-        public static function bytes_gen( int $length = 16, bool $strongEnforce = true ): string
+        public static function gen_bytes( $length = 16, $strongEnforce = true ): string
         {
             $bytes = openssl_random_pseudo_bytes( $length, $strongResult );
             if( false === $strongResult && true === $strongEnforce ) {
-                return cyphper::bytes_gen( $length );
+                return cyphper::gen_hex( $length );
             } else {
                 return $bytes;
             }
         }
 
-        public static function key_gen( int $length = 16, bool $strongEnforce = true ): string
+        public static function gen_hex( $length = 16, $strongEnforce = true ): string
         {
-            $bytes = cyphper::bytes_gen( $length / 2 );
+            $bytes = cyphper::gen_bytes( $length / 2 );
             return bin2hex( $bytes );
         }
 
-        public static function hmac_sign( string $ct, string $key ): string
+        public static function hmac_sign( $ct, $key ): string
         {
             return hash_hmac( 'sha256', $ct, $key ) . $ct;
         }
 
-        public static function hmac_auth( string $msg, string $key ): bool
+        public static function hmac_auth( $msg, $key ): bool
         {
             $hmac = substr( $msg, 0, 64 );
             $ct = substr( $msg, 64 );
@@ -35,8 +36,8 @@
 
         public static function encrypt( string $pt, string $key = null, string $iv = null ): array
         {
-            $key = ( empty( $key ) || 32 > strlen( $key )) ? cyphper::key_gen( 32 ) : $key;
-            $iv = ( empty( $iv ) || 16 > strlen( $iv )) ? cyphper::key_gen( 16 ) : $iv;
+            $key = ( empty( $key ) || 32 > strlen( $key )) ? cyphper::gen_hex( 32 ) : $key;
+            $iv = ( empty( $iv ) || 16 > strlen( $iv )) ? cyphper::gen_hex( 16 ) : $iv;
             $ct = openssl_encrypt( $pt, 'AES-256-CBC', $key, 0, $iv );
             $msg = cyphper::hmac_sign( $ct, $key );
             return array( 'message' => $msg, 'key' => $key, 'iv' => $iv );
@@ -45,7 +46,7 @@
         public static function decrypt( string $msg, string $key, string $iv ): string
         {
             if( true !== cyphper::hmac_auth( $msg, $key )) {
-                return "Encrypted message failed HMAC authentication";
+                throw new Exception( 'Encrypted message failed HMAC authentication' );
             } else {
                 $ct = substr( $msg, 64 );
                 return openssl_decrypt( $ct, 'AES-256-CBC', $key, 0, $iv );
