@@ -58,7 +58,7 @@ Decrypted data: example.php
 ```
 
 ### Exception Codes
-While all the data handling within cyphper is handled automatigally, there might be an edge case scenario where an exception is thrown. Each exception has an accompanying message, however the following codes are also included:
+While all the data handling within cyphper is handled automatigally to mitigate any errors, there might be an edge case scenario where an exception is thrown. Each exception has a detailed message, however the following codes also accompany their respective message:
 |No.|Description|
 |---|-----------|
 |1|Missing input data|
