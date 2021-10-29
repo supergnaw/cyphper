@@ -57,6 +57,18 @@ Encrypted data: NzQ4MGMwNzgxYWM0ODk3MmYyZTUxZGZiMTBjMGY5NTg1YTFiYjdlMjU1YjI5MWZm
 Decrypted data: example.php
 ```
 
+### Exception Codes
+While all the data handling within cyphper is handled automatigally, there might be an edge case scenario where an exception is thrown. Each exception has an accompanying message, however the following codes are also included:
+|No.|Description|
+|---|-----------|
+|1|Missing input data|
+|2|Missing encryption keys|
+|3|Encryption/Hash method Unsupported|
+|4|Encryption error|
+|5|Decryption error|
+|6|Authentication failure|
+|7|Invalid key byte length|
+
 ## Static
 The static class was the first iteration and remains here for historical purposes. It likely will not be updated in the future, but might be in the instance the author becomes bored or a pull request is created.
 
