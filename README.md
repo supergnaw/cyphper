@@ -4,7 +4,7 @@ Simple PHP class to easily implement authenticated data encryption and decryptio
 ***This by no means is meant to replace robust and significantly tested libraries like [Halite](https://github.com/paragonie/halite). This is a learning exercise in capabilities for the author.***
 
 ## Instantiated
-The instantiated version of cyphper is recommended since all variables are generated and handled internally to protect the data. It also generates stronger encryption keys for encryption and authentication. The only information able to be retrieved is the encrypted message of the original information or the decrypted message from the provided data upon instantiation.
+The instantiated version of cyphper is recommended since all variables are generated and handled internally to protect the data. It also generates stronger keys for encryption and authentication. The only information able to be retrieved is the encrypted message of the original information or the decrypted message from the provided data upon instantiation.
 
 ### Basic Usage
 The `cyphper()` class is instantiated with the data to be encrypted/decrypted, along with the secret password to be used.
