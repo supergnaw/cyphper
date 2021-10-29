@@ -45,10 +45,15 @@
 
 		function __destruct()
 		{
+			// lets be about as destructive as we can get to protect all that sensitive encrypted data
 			foreach( $this as $key => $val ) {
 				$this->$key = null;
+				unset( $this->$key );
+				$key = null;
+				unset( $key );
+				$val = null;
+				unset( $val );
 			}
-			$val = null;
 		}
 
 		/*
@@ -59,7 +64,7 @@
 		{
 			// verify data is present
 			if( empty( $this->data )) {
-				throw new Exception( "Missing data to encrypt." );
+				throw new Exception( "Missing or empty data to encrypt.", 1 );
 			}
 
 			// prepare decryption and authentication keys
@@ -67,7 +72,7 @@
 
 			// verify keys are present
 			if( empty( $this->hmacKey ) || empty( $this->encryptionKey )) {
-				throw new Exception( "Missing one or more encryption keys." );
+				throw new Exception( "Missing one or more encryption keys.", 2 );
 			}
 
 			// clear any previously encrypted message
@@ -75,34 +80,25 @@
 
 			// perform encryption
 			if( !in_array( strtolower( $this->encryptionMethod ), $this->cypherMethods )) {
-				throw new Exception( "Encryption method not supported." );
-			} else {
-				$this->ct = openssl_encrypt( $this->data, $this->encryptionMethod, $this->encryptionKey, OPENSSL_RAW_DATA, $this->iv );
+				throw new Exception( "Encryption method not supported.", 3 );
 			}
+			if( $this->ct = openssl_encrypt( $this->data, $this->encryptionMethod, $this->encryptionKey, OPENSSL_RAW_DATA, $this->iv )) {
+				// sign encrypted data
+				$this->hmac_sign();
 
-			// sign encrypted data
-			$this->hmac_sign();
-
-			// encode encryption to base64 for ease of use
-			if( empty( $this->hmac ) || empty( $this->iv ) || empty( $this->ct )) {
-				throw new Exception( "There was an error while attempting to encrypt the data." );
-			} else {
+				// create and encode authenticated message
 				$this->encMsg = base64_encode( $this->hmac . $this->iv . $this->ct );
-			}
-
-			// create authenticated message
-			if( empty( $this->encMsg )) {
-				throw new Exception( "Failed to create authenticated encrypted message." );
 			} else {
-				return true;
+				throw new Exception( "There was an error while encrypting the data.", 4 );
 			}
+			return true;
 		}
 
 		public function decrypt(): bool
 		{
 			// verify data is present
 			if( empty( $this->data )) {
-				throw new Exception( "Missing data to encrypt." );
+				throw new Exception( "Missing or empty data to decrypt.", 1 );
 			}
 
 			// clear any previously decrypted message
@@ -121,21 +117,19 @@
 
 			// verify keys are present
 			if( empty( $this->hmacKey ) || empty( $this->encryptionKey )) {
-				throw new Exception( "Missing one or more decryption keys." );
+				throw new Exception( "Missing one or more encryption keys.", 2 );
 			}
 
 			// authenticate encryption
 			if( !$this->hmac_auth()) {
-				throw new Exception( "Encrypted data failed authentication." );
+				throw new Exception( "Encrypted data failed authentication.", 6 );
 			}
 
 			// perform decryption
-			$this->decMsg = openssl_decrypt( $this->ct, $this->encryptionMethod, $this->encryptionKey, OPENSSL_RAW_DATA, $this->iv );
-
-			if( empty( $this->decMsg )) {
-				throw new Exception( 'Unable to decrypt.' );
-			} else {
+			if( $this->decMsg = openssl_decrypt( $this->ct, $this->encryptionMethod, $this->encryptionKey, OPENSSL_RAW_DATA, $this->iv )) {
 				return true;
+			} else {
+				throw new Exception( "There was an error while decrypting the data.", 5 );
 			}
 		}
 
@@ -147,25 +141,21 @@
 		{
 			$this->hmac = null;
 			if( !in_array( strtolower( $this->hmacHashMethod ), $this->hashAlgorithms )) {
-				throw new Exception( "Hash method not available: {$this->hmacHashMethod}" );
-			} else {
-				if( empty( $this->iv ) || empty( $this->ct )) {
-					throw new Exception( "Cannot authenticate empty data." );
-				} else {
-					$this->hmac = hash_hmac( $this->hmacHashMethod, $this->iv . $this->ct, $this->hmacKey );
-				}
+				throw new Exception( "HMAC algorithm not supported.", 3 );
 			}
-			if( empty( $this->hmac )) {
-				return false;
-			} else {
+
+			if( empty( $this->iv ) || empty( $this->ct )) {
+				throw new Exception( "Cannot authenticate missing or empty data.", 1 );
+			}
+			if( $this->hmac = hash_hmac( $this->hmacHashMethod, $this->iv . $this->ct, $this->hmacKey )) {
 				return true;
+			} else {
+				return false;
 			}
 		}
 
 		private function hmac_auth(): bool
 		{
-			// $hmac = substr( $data, 0, 64 );
-			// $ct = substr( $data, 64 );
 			return hash_equals( hash_hmac( "sha256", $this->iv . $this->ct, $this->hmacKey ), $this->hmac );
 		}
 
@@ -191,7 +181,7 @@
 		public static function gen_bytes( int $length = 16, bool $strongEnforce = true ): string
 		{
 			if( abs( $length ) !== $length ) {
-				throw new Exception( "Defined length of bites must be a positive integer." );
+				throw new Exception( "Defined length of bites must be a positive integer.", 7 );
 			} else {
 				$bytes = openssl_random_pseudo_bytes( $length, $strongResult );
 				if( false === $strongResult && true === $strongEnforce ) {
@@ -206,7 +196,7 @@
 		{
 			// prepare initialization vector if empty
 			if( empty( $this->iv )) {
-				$this->gen_iv();
+				$this->gen_iv( 16 );
 			}
 
 			// generate raw keys
