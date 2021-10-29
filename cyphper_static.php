@@ -1,5 +1,5 @@
 <?php
-    class cyphper {
+    class cyphper_static {
 
         function __construct()
         {
@@ -10,7 +10,7 @@
         {
             $bytes = openssl_random_pseudo_bytes( $length, $strongResult );
             if( false === $strongResult && true === $strongEnforce ) {
-                return cyphper::gen_hex( $length );
+                return cyphper_static::gen_hex( $length );
             } else {
                 return $bytes;
             }
@@ -18,7 +18,7 @@
 
         public static function gen_hex( $length = 16, $strongEnforce = true ): string
         {
-            $bytes = cyphper::gen_bytes( $length / 2 );
+            $bytes = cyphper_static::gen_bytes( $length / 2 );
             return bin2hex( $bytes );
         }
 
@@ -36,16 +36,16 @@
 
         public static function encrypt( string $pt, string $key = null, string $iv = null ): array
         {
-            $key = ( empty( $key ) || 32 > strlen( $key )) ? cyphper::gen_hex( 32 ) : $key;
-            $iv = ( empty( $iv ) || 16 > strlen( $iv )) ? cyphper::gen_hex( 16 ) : $iv;
+            $key = ( empty( $key ) || 32 > strlen( $key )) ? cyphper_static::gen_hex( 32 ) : $key;
+            $iv = ( empty( $iv ) || 16 > strlen( $iv )) ? cyphper_static::gen_hex( 16 ) : $iv;
             $ct = openssl_encrypt( $pt, 'AES-256-CBC', $key, 0, $iv );
-            $msg = cyphper::hmac_sign( $ct, $key );
+            $msg = cyphper_static::hmac_sign( $ct, $key );
             return array( 'message' => $msg, 'key' => $key, 'iv' => $iv );
         }
 
         public static function decrypt( string $msg, string $key, string $iv ): string
         {
-            if( true !== cyphper::hmac_auth( $msg, $key )) {
+            if( true !== cyphper_static::hmac_auth( $msg, $key )) {
                 throw new Exception( 'Encrypted message failed HMAC authentication' );
             } else {
                 $ct = substr( $msg, 64 );
