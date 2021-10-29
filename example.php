@@ -12,7 +12,7 @@
 		die( $e->getMessage());
 	}
 	echo "Encrypted data: {$enc}<br>\n";
-
+	
 	// decrypt
 	$cyp = new cyphper( $enc, $pwd );
 	try {
